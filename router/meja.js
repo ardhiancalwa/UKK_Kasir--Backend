@@ -1,11 +1,12 @@
 const express = require("express")
 const meja = require("../models/index").meja
+const auth = require("../auth")
 const app = express()
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
-app.get("/", async (req, res) => {
+app.get("/", auth, async (req, res) => {
   meja.findAll()
     .then(result => {
       res.json({
@@ -19,7 +20,7 @@ app.get("/", async (req, res) => {
     })
 })
 
-app.get("/:id", async (req, res) => {
+app.get("/:id", auth, async (req, res) => {
   let param = {
     id_meja: req.params.id
   }
@@ -36,9 +37,9 @@ app.get("/:id", async (req, res) => {
     })
 })
 
-app.get("/status/:status", async (req, res) => {
+app.get("/status/:status_meja", async (req, res) => {
   let param = {
-    status_meja: req.params.status
+    status_meja: req.params.status_meja
   }
   meja.findAll({ where: param })
     .then(result => {
@@ -53,7 +54,7 @@ app.get("/status/:status", async (req, res) => {
     })
 })
 
-app.post("/", async (req, res) => {
+app.post("/", auth, async (req, res) => {
   let data = {
     nomor_meja: req.body.nomor_meja,
     status_meja: req.body.status_meja
@@ -72,7 +73,7 @@ app.post("/", async (req, res) => {
     })
 })
 
-app.put("/", async (req, res) => {
+app.put("/", auth, async (req, res) => {
   let param = {
     id_meja: req.body.id_meja
   }
