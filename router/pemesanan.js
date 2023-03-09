@@ -8,6 +8,8 @@ const menu = require("../models/index").menu
 const meja = require("../models/index").meja
 const user = require("../models/index").user
 
+const { Op } = require('sequelize')
+
 const auth = require("../auth")
 const SECRET_KEY = "INIPUNYAKASIR"
 
@@ -80,6 +82,30 @@ app.get("/detail/menu/:id",auth, async (req, res) => {
 app.get("/",auth, async (req, res) => {
     transaksi.findAll({
         include: ["user", "meja"]
+    })
+        .then(result => {
+            res.json({
+                data: result
+            })
+        })
+        .catch(error => {
+            res.json({
+                message: error.message
+            })
+        })
+})
+
+app.get("/user/:nama_user", auth, async (req, res) => {
+    let param = {
+        nama_user: req.params.nama_user,
+    }
+    transaksi.findAll({
+        include: ["user", "meja"],
+        where: {
+            [Op.or]: [
+                {'$user.nama_user$': {[Op.like]: `%${param.nama_user}%`}}
+            ]
+        }
     })
         .then(result => {
             res.json({
