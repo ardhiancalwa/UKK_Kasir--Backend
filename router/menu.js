@@ -5,6 +5,8 @@ const multer = require("multer")
 const path = require("path")
 const fs = require("fs")
 
+const { Op } = require('sequelize')
+
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
@@ -31,6 +33,29 @@ app.get("/", async (req, res) => {
         message: error.message
       })
     })
+})
+
+app.get("/menu/:nama_menu", auth, async (req, res) => {
+  let param = {
+      nama_menu: req.params.nama_menu,
+  }
+  menu.findAll({
+      where: {
+          [Op.or]: [
+              {'$menu.nama_menu$': {[Op.like]: `%${param.nama_menu}%`}}
+          ]
+      }
+  })
+      .then(result => {
+          res.json({
+              data: result
+          })
+      })
+      .catch(error => {
+          res.json({
+              message: error.message
+          })
+      })
 })
 
 app.get("/:id", async (req, res) => {
