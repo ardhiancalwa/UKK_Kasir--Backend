@@ -9,6 +9,7 @@ const meja = require("../models/index").meja
 const user = require("../models/index").user
 
 const { Op } = require('sequelize')
+const model = require("../models/index");
 
 const auth = require("../auth")
 const SECRET_KEY = "INIPUNYAKASIR"
@@ -119,6 +120,67 @@ app.get("/user/:nama_user", auth, async (req, res) => {
         })
 })
 
+app.get("/tanggal/:awal/:akhir", auth, async (req, res) => {
+    transaksi.findAll({
+        include: ["user", "meja"],
+        where: {
+            tgl_transaksi: {
+                [Op.between]: [req.params.awal, req.params.akhir],
+            }
+        }
+    })
+        .then(result => {
+            res.json({
+                data: result
+            })
+        })
+        .catch(error => {
+            res.json({
+                message: error.message
+            })
+        })
+})
+
+app.get("/detail/menu/:id", auth, async (req, res) => {
+    let param = {
+        id_menu: req.params.id
+    }
+    detail_transaksi.findAll({
+        include: ["transaksi", "menu"],
+        where: param
+    })
+        .then(result => {
+            res.json({
+                data: result
+            })
+        })
+        .catch(error => {
+            res.json({
+                message: error.message
+            })
+        })
+})
+
+app.get("/riwayat/:status", auth, async (req, res) => {
+    let param = {
+        status: req.params.status,
+    }
+    transaksi.findAll({
+        include: ["user", "meja"],
+        where: param
+    })
+        .then(result => {
+            res.json({
+                data: result
+            })
+        })
+        .catch(error => {
+            res.json({
+                message: error.message
+            })
+        })
+})
+
 app.get("/riwayat/:status/:id",auth, async (req, res) => {
     let param = {
         status: req.params.status,
@@ -198,6 +260,43 @@ app.post("/",auth, async (req, res) => {
                 res.json({
                     message: error.message
                 })
+            })
+        })
+        .catch(error => {
+            res.json({
+                message: error.message
+            })
+        })
+})
+
+app.post("/detail/add", auth, async (req, res) => {
+    let detail = req.body.detail_transaksi
+    detail_transaksi.bulkCreate(detail)
+        .then(result => {
+            res.json({
+                message: "Data Berhasil Ditambahkan",
+                data: result
+            })
+        })
+        .catch(error => {
+            res.json({
+                message: error.message
+            })
+        })
+})
+
+app.put("/ubahqty", auth, async (req, res) => {
+    let param = {
+        id_transaksi: req.body.id_transaksi,
+        id_menu: req.body.id_menu
+    }
+    let data = {
+        qty: req.body.qty
+    }
+    detail_transaksi.update(data, { where: param })
+        .then(result => {
+            res.json({
+                message: "Data Berhasil Diperbarui"
             })
         })
         .catch(error => {
